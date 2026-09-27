@@ -93,7 +93,14 @@ export function MethodCycle() {
         </AnimatePresence>
       </div>
 
-      <div className="relative mt-2xl h-[92px] px-lg">
+      {/* mx-xl (margin, not padding): the first/last step nodes are
+          absolutely positioned at the track's 0%/100% points, which CSS
+          resolves against the track's own padding-box edge — so padding
+          on the track has no effect on them at all, only margin actually
+          insets that 0%/100% reference frame. Their labels ("Diagnosticar"
+          is the widest at ~73px) need at least half that width as clearance
+          or they clip against the viewport edge on mobile. */}
+      <div className="relative mx-xl mt-2xl h-[92px]">
         <div className="absolute left-0 right-0 top-[20px] h-[3px] -translate-y-1/2 rounded-pill bg-[rgba(40,41,40,0.1)] dark:bg-[rgba(239,238,239,0.12)]" />
         <motion.div
           className="absolute left-0 top-[20px] h-[3px] -translate-y-1/2 rounded-pill bg-brand-primary"
