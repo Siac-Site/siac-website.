@@ -66,7 +66,7 @@ Alguns conteúdos ainda são placeholders temporários, aguardando material fina
 
 ## Deploy
 
-O projeto já está conectado à Vercel via GitHub: qualquer `git push` na branch `main` gera automaticamente um novo deploy de produção. Não é necessário rodar nenhum comando manual de deploy.
+O projeto já está conectado à Vercel via GitHub: qualquer `git push` na branch `main` gera automaticamente um novo deploy de produção. Não é necessário rodar nenhum comando manual de deploy. O repositório pertence à organização `Siac-Site` no GitHub; se a Vercel for trocada de conta, basta importar esse repositório lá.
 
 ## Segurança — atualização do Next.js recomendada
 
