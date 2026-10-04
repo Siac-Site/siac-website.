@@ -4,6 +4,8 @@ Site institucional da SIAC (ERP Crítico, Resiliência Cibernética, Operação 
 
 **Site em produção:** https://siac-website-main.vercel.app
 
+**Repositório:** https://github.com/Siac-Site/siac-website.
+
 ## Stack
 
 - [Next.js 14](https://nextjs.org) (App Router) + TypeScript
