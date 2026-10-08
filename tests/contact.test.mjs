@@ -88,10 +88,46 @@ test("Cloudflare HTTP failure does not send email", async () => {
   assert.equal((await handleContact(request(), deps)).status, 503);
   assert.equal(deps.sent.length, 0);
 });
-test("SMTP failure never reports success or leaks provider details", async () => {
+test("SMTP failure never reports success or leaks provider details", async (t) => {
+  const log = t.mock.method(console, "error", () => {});
   const deps = dependencies();
   deps.send = async () => { throw new Error("sensitive SMTP detail"); };
   const res = await handleContact(request(), deps);
   assert.equal(res.status, 502);
   assert.doesNotMatch(await res.text(), /sensitive SMTP detail/);
+  assert.deepEqual(log.mock.calls[0].arguments, ["contact_delivery_failed", {
+    reference: "SMTP_UNKNOWN", command: "UNKNOWN", responseCode: null,
+  }]);
+});
+
+for (const code of ["EAUTH", "EDNS", "ECONNECTION", "ESOCKET", "ETIMEDOUT", "ETLS", "EENVELOPE", "EMESSAGE", "ESTREAM", "EREQUIRETLS"]) {
+  test(`SMTP ${code} exposes only an allowlisted reference`, async (t) => {
+    const log = t.mock.method(console, "error", () => {});
+    const deps = dependencies();
+    deps.send = async () => { throw Object.assign(new Error("private-password"), {
+      code, command: "AUTH PLAIN", responseCode: 535, response: "private-address@example.com",
+    }); };
+    const res = await handleContact(request(), deps);
+    assert.equal(res.status, 502);
+    const body = await res.text();
+    assert.match(body, new RegExp(`SMTP_${code}`));
+    assert.doesNotMatch(body, /private-|535|AUTH PLAIN/);
+    assert.deepEqual(log.mock.calls[0].arguments, ["contact_delivery_failed", {
+      reference: `SMTP_${code}`, command: "AUTH PLAIN", responseCode: 535,
+    }]);
+  });
+}
+
+test("unrecognized SMTP diagnostic fields cannot leak into responses or logs", async (t) => {
+  const log = t.mock.method(console, "error", () => {});
+  const deps = dependencies();
+  deps.send = async () => { throw {
+    code: "private-password", command: "AUTH PLAIN private-token", responseCode: "private-response",
+  }; };
+  const res = await handleContact(request(), deps);
+  assert.equal(res.status, 502);
+  assert.doesNotMatch(await res.text(), /private-/);
+  assert.deepEqual(log.mock.calls[0].arguments, ["contact_delivery_failed", {
+    reference: "SMTP_UNKNOWN", command: "UNKNOWN", responseCode: null,
+  }]);
 });

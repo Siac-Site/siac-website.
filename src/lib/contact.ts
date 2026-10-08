@@ -15,6 +15,29 @@ type Dependencies = {
 
 const EMAIL = /^[^\s<>(),;:\\"\[\]]+@[^\s<>(),;:\\"\[\]]+\.[^\s<>(),;:\\"\[\]]+$/;
 const MAX_BYTES = 24_000;
+const SMTP_CODES = new Set([
+  "EAUTH", "EDNS", "ECONNECTION", "ESOCKET", "ETIMEDOUT", "ETLS",
+  "EENVELOPE", "EMESSAGE", "ESTREAM", "EREQUIRETLS",
+]);
+const SMTP_COMMANDS = new Set([
+  "CONN", "EHLO", "HELO", "STARTTLS", "AUTH", "AUTH PLAIN", "AUTH LOGIN",
+  "AUTH CRAM-MD5", "MAIL FROM", "RCPT TO", "DATA",
+]);
+
+function smtpDiagnostic(error: unknown) {
+  const detail = error && typeof error === "object"
+    ? error as Record<string, unknown> : {};
+  // Only allow known identifiers: provider messages may contain private data.
+  const code = typeof detail.code === "string" && SMTP_CODES.has(detail.code)
+    ? detail.code : "UNKNOWN";
+  const command = typeof detail.command === "string" && SMTP_COMMANDS.has(detail.command)
+    ? detail.command : "UNKNOWN";
+  const responseCode = typeof detail.responseCode === "number" &&
+    Number.isInteger(detail.responseCode) && detail.responseCode >= 400 && detail.responseCode <= 599
+    ? detail.responseCode : null;
+  return { reference: `SMTP_${code}`, command, responseCode };
+}
+
 const reply = (status: number, error?: string) =>
   Response.json(error ? { error } : { ok: true }, {
     status,
@@ -107,8 +130,9 @@ export async function handleContact(request: Request, deps: Dependencies) {
   try {
     await deps.send(contact);
     return reply(200);
-  } catch {
-    // Do not log message content, credentials or raw SMTP responses.
-    return reply(502, "Não foi possível confirmar o envio. Tente mais tarde ou use nossos canais diretos.");
+  } catch (error) {
+    const diagnostic = smtpDiagnostic(error);
+    console.error("contact_delivery_failed", diagnostic);
+    return reply(502, `Não foi possível confirmar o envio. Tente mais tarde ou use nossos canais diretos. Referência: ${diagnostic.reference}.`);
   }
 }
