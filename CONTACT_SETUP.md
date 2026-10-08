@@ -25,6 +25,17 @@ em Reply-To. Nao existe resposta automatica ao visitante.
    producao em testes automatizados. URLs temporarias nao sao automaticamente
    autorizadas. Sem configuracao, o envio fica bloqueado.
 
+## Diagnostico SMTP
+
+Falhas de envio exibem uma referencia limitada a codigos conhecidos, como
+SMTP_EAUTH (autenticacao), SMTP_ETIMEDOUT (tempo esgotado), SMTP_EDNS (DNS),
+SMTP_ETLS (TLS) e SMTP_EENVELOPE (remetente/destinatario). SMTP_UNKNOWN indica
+uma falha nao classificada. A referencia orienta a investigacao, nao confirma
+sozinha a causa. O log contact_delivery_failed inclui apenas essa referencia,
+o comando SMTP permitido e um codigo numerico de rejeicao, quando disponivel.
+Nunca registrar senha, token, dados do formulario ou resposta SMTP completa.
+Conferir a caixa de destino antes de repetir um envio com falha ambigua.
+
 ## Limite de volume
 
 Turnstile reduz automacao, mas nao define uma cota de mensagens. Complementar
