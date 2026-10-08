@@ -1,8 +1,46 @@
 "use client";
 
 import { Send } from "lucide-react";
+import { useRef, useState, type FormEvent } from "react";
+import { Turnstile } from "@/components/Turnstile";
 
 export function Contact() {
+  const [token, setToken] = useState("");
+  const [resetKey, setResetKey] = useState(0);
+  const [sending, setSending] = useState(false);
+  const [status, setStatus] = useState("");
+  const inFlight = useRef(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (inFlight.current || !token) return;
+    const form = event.currentTarget;
+    const fields = new FormData(form);
+    inFlight.current = true;
+    setSending(true);
+    setStatus("");
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...Object.fromEntries(fields), token }),
+        signal: AbortSignal.timeout(35000),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Não foi possível enviar a mensagem.");
+      form.reset();
+      setStatus("Mensagem enviada. Nossa equipe entrará em contato.");
+    } catch (error) {
+      setStatus(error instanceof Error && error.name !== "TimeoutError"
+        ? error.message
+        : "Não foi possível confirmar o envio. Use nossos canais diretos ou tente mais tarde.");
+    } finally {
+      inFlight.current = false;
+      setSending(false);
+      setToken("");
+      setResetKey((value) => value + 1);
+    }
+  }
   return (
     <section
       id="contato"
@@ -26,14 +64,17 @@ export function Contact() {
 
         {/* Coluna direita — formulário */}
         <form
-          onSubmit={(e) => e.preventDefault()}
-          className="rounded-card-lg border border-white/60 bg-white/50 p-lg backdrop-blur-glass dark:border-white/10 dark:bg-white/5"
+          onSubmit={submit}
+          className="min-w-0 rounded-card-lg border border-white/60 bg-white/50 p-lg backdrop-blur-glass dark:border-white/10 dark:bg-white/5"
         >
           <div className="flex flex-col gap-md">
             <Field label="Nome completo" htmlFor="name">
               <input
                 id="name"
                 name="name"
+                required
+                maxLength={120}
+                autoComplete="name"
                 type="text"
                 placeholder="Seu nome"
                 className={inputClasses}
@@ -45,6 +86,9 @@ export function Contact() {
                 <input
                   id="email"
                   name="email"
+                  required
+                  maxLength={254}
+                  autoComplete="email"
                   type="email"
                   placeholder="seu@email.com"
                   className={inputClasses}
@@ -54,6 +98,8 @@ export function Contact() {
                 <input
                   id="phone"
                   name="phone"
+                  maxLength={40}
+                  autoComplete="tel"
                   type="tel"
                   placeholder="(00) 00000-0000"
                   className={inputClasses}
@@ -65,6 +111,8 @@ export function Contact() {
               <input
                 id="company"
                 name="company"
+                maxLength={160}
+                autoComplete="organization"
                 type="text"
                 placeholder="Nome da empresa"
                 className={inputClasses}
@@ -75,17 +123,27 @@ export function Contact() {
               <textarea
                 id="message"
                 name="message"
+                required
+                maxLength={4000}
                 placeholder="Como podemos ajudar?"
                 rows={5}
                 className={`${inputClasses} resize-none`}
               />
             </Field>
 
+            <div className="hidden" aria-hidden="true">
+              <label htmlFor="website">Website</label>
+              <input id="website" name="website" tabIndex={-1} autoComplete="off" />
+            </div>
+            <Turnstile onToken={setToken} resetKey={resetKey} />
+            <p role="status" aria-live="polite" className="text-sm">{status}</p>
+
             <button
               type="submit"
-              className="mt-sm flex items-center justify-center gap-xs rounded-button bg-brand-primary px-lg py-sm text-sm font-semibold text-white shadow-level-1 transition-colors ease-brand hover:bg-brand-primary-dark"
+              disabled={!token || sending}
+              className="mt-sm flex items-center justify-center gap-xs rounded-button bg-brand-primary px-lg py-sm text-sm font-semibold text-white shadow-level-1 transition-colors ease-brand hover:bg-brand-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Enviar mensagem
+              {sending ? "Enviando..." : "Enviar mensagem"}
               <Send size={16} />
             </button>
 

@@ -47,6 +47,14 @@ const SECTIONS = [
             preferência de tema claro/escuro), coletadas de forma
             automatizada para o funcionamento e a melhoria da experiência.
           </li>
+          <li>
+            <strong className="font-semibold">Proteção contra envios automatizados:</strong>{" "}
+            usamos o Cloudflare Turnstile no formulário de contato para verificar
+            sinais técnicos do navegador e da conexão. A Cloudflare processa
+            esses sinais para identificar automação e abuso. O conteúdo dos
+            campos do formulário é encaminhado à nossa equipe por e-mail;
+            nossa integração não envia esse conteúdo à API de validação do Turnstile.
+          </li>
         </ul>
       </>
     ),
@@ -201,7 +209,7 @@ export default function PoliticaDePrivacidadePage() {
             Política de Privacidade
           </h1>
           <p className="mt-sm text-sm text-brand-graphite/60 dark:text-brand-ice/60">
-            Última atualização: 1º de setembro de 2026
+            Última atualização: 7 de outubro de 2026
           </p>
 
           <div className="mt-2xl flex flex-col gap-xl text-base leading-relaxed text-brand-graphite/80 dark:text-brand-ice/80 md:text-lg">
