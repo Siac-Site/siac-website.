@@ -1,11 +1,29 @@
 import type { Metadata } from "next";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { SOCIAL_IMAGE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade — SIAC",
   description:
     "Como a SIAC Engenharia Digital coleta, usa e protege os dados pessoais tratados neste site, em conformidade com a LGPD.",
+  alternates: {
+    canonical: "/politica-de-privacidade",
+  },
+  openGraph: {
+    url: "/politica-de-privacidade",
+    title: "Política de Privacidade — SIAC",
+    description:
+      "Como a SIAC Engenharia Digital coleta, usa e protege os dados pessoais tratados neste site, em conformidade com a LGPD.",
+    images: [SOCIAL_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Política de Privacidade — SIAC",
+    description:
+      "Como a SIAC Engenharia Digital coleta, usa e protege os dados pessoais tratados neste site, em conformidade com a LGPD.",
+    images: [SOCIAL_IMAGE.url],
+  },
 };
 
 const SECTIONS = [

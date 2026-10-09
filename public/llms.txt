@@ -1,0 +1,24 @@
+# SIAC Engenharia Digital
+
+> Engenharia e operação de tecnologia crítica para empresas cuja operação não pode parar.
+
+Site oficial: https://www.siac.tech/
+Idioma: português do Brasil
+Área de atuação: Brasil
+
+## Soluções
+
+- ERP Crítico: https://www.siac.tech/solucoes/erp-critico
+- Resiliência Cibernética: https://www.siac.tech/solucoes/resiliencia-cibernetica
+- Operação de TI: https://www.siac.tech/solucoes/operacao-de-ti
+
+## Empresa
+
+- Página institucional: https://www.siac.tech/
+- Política de Privacidade: https://www.siac.tech/politica-de-privacidade
+
+## Contato público
+
+- E-mail: comercial@siactecnologia.com.br
+- Telefone: +55 27 4042-1758
+- Endereço: Av. Rosendo Serapião de Souza Filho, 595, Ed. Mata da Praia, salas 101 e 102, Vitória, ES, Brasil, CEP 29065-020

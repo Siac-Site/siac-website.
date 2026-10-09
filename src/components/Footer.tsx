@@ -5,9 +5,12 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const SERVICES = [
-  { label: "ERP Crítico", href: "#solucoes" },
-  { label: "Resiliência Cibernética", href: "#solucoes" },
-  { label: "Operação de TI", href: "#solucoes" },
+  { label: "ERP Crítico", href: "/solucoes/erp-critico" },
+  {
+    label: "Resiliência Cibernética",
+    href: "/solucoes/resiliencia-cibernetica",
+  },
+  { label: "Operação de TI", href: "/solucoes/operacao-de-ti" },
 ];
 
 const COMPANY = [

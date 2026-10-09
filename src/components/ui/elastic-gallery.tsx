@@ -6,74 +6,17 @@ import { createPortal } from "react-dom";
 import { ArrowRight, Check, X } from "lucide-react";
 import { CornerBrackets } from "@/components/ui/corner-brackets";
 import { PlaceholderImage } from "@/components/ui/placeholder-image";
-
-interface ElasticItemProps {
-  id: string;
-  title: string;
-  description: string;
-  // TEMP — approval placeholder image, swapped for real SIAC content later
-  image: string;
-  includes: string[];
-  outcome: string;
-}
-
-const ITEMS: ElasticItemProps[] = [
-  {
-    id: "01",
-    title: "ERP Crítico",
-    description:
-      "Quando o ERP para, a operação para. Cuidamos de banco de dados, infraestrutura e monitoramento para que ele nunca seja o motivo da parada.",
-    image: "/images/placeholders/erp-dashboard.jpg",
-    includes: [
-      "Administração de banco de dados (DBA) e SysOps",
-      "Infraestrutura e cloud dedicadas ao ERP",
-      "Monitoramento contínuo do ambiente",
-      "Continuidade operacional planejada",
-    ],
-    outcome:
-      "Estabilidade e performance — o ERP deixa de ser o motivo da parada.",
-  },
-  {
-    id: "02",
-    title: "Resiliência Cibernética",
-    description:
-      "Reduzir exposição e tempo de recuperação é o que sustenta a confiança no sistema. Cuidamos do monitoramento, backup, proteção e melhoria contínua dos controles.",
-    image: "/images/placeholders/cyber-resilience-server.jpg",
-    includes: [
-      "Monitoramento contínuo de ameaças",
-      "Backup e recuperação de desastres (DR)",
-      "Proteção e hardening de controles",
-      "Melhoria contínua da postura de segurança",
-    ],
-    outcome:
-      "Menos exposição e menos tempo de recuperação quando um incidente acontece.",
-  },
-  {
-    id: "03",
-    title: "Operação de TI",
-    description:
-      "Para quem precisa de alguém cuidando continuamente, não apenas quando algo quebra. Suporte, NOC e governança com responsabilidade contínua sobre o ambiente.",
-    image: "/images/placeholders/it-operations-noc.jpg",
-    includes: [
-      "Suporte e NOC com responsabilidade contínua",
-      "Um único responsável pelo ambiente (owner)",
-      "Governança e backlog tratado de forma proativa",
-      "Atuação preventiva, não só corretiva",
-    ],
-    outcome:
-      "Previsibilidade e foco — alguém cuidando do ambiente todos os dias, não só quando quebra.",
-  },
-];
+import { SOLUTIONS, type Solution } from "@/lib/solutions";
 
 function ElasticGallery() {
   const [activeId, setActiveId] = useState<string | null>("01");
-  const [detailItem, setDetailItem] = useState<ElasticItemProps | null>(null);
+  const [detailItem, setDetailItem] = useState<Solution | null>(null);
 
   return (
     <div className="w-full py-lg">
       {/* Container: Fixed height on mobile/desktop to ensure animation stability */}
       <div className="mx-auto flex h-[375px] w-full max-w-[1200px] flex-col gap-2 px-sm md:h-[450px] md:flex-row md:gap-4 md:px-lg">
-        {ITEMS.map((item) => (
+        {SOLUTIONS.map((item) => (
           <div
             key={item.id}
             onMouseEnter={() => setActiveId(item.id)}
@@ -242,6 +185,13 @@ function ElasticGallery() {
                   className="mt-lg inline-flex items-center gap-xs rounded-button bg-brand-primary px-lg py-sm text-sm font-semibold text-white shadow-level-1 transition-colors ease-brand hover:bg-brand-primary-dark"
                 >
                   Falar sobre {detailItem.title}
+                  <ArrowRight size={16} />
+                </a>
+                <a
+                  href={`/solucoes/${detailItem.slug}`}
+                  className="ml-sm mt-lg inline-flex items-center gap-xs text-sm font-semibold text-brand-ice/70 transition-colors ease-brand hover:text-white"
+                >
+                  Ver detalhes da solução
                   <ArrowRight size={16} />
                 </a>
               </div>

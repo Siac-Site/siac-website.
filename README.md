@@ -68,6 +68,14 @@ Alguns conteúdos ainda são placeholders temporários, aguardando material fina
 
 O projeto já está conectado à Vercel via GitHub: qualquer `git push` na branch `main` gera automaticamente um novo deploy de produção. Não é necessário rodar nenhum comando manual de deploy. O repositório pertence à organização `Siac-Site` no GitHub; se a Vercel for trocada de conta, basta importar esse repositório lá (Vercel → Add New → Project → selecionar `Siac-Site/siac-website.`).
 
+## SEO e descoberta
+
+- `src/app/robots.ts` publica as regras de rastreamento e informa o sitemap.
+- `src/app/sitemap.ts` lista as URLs canônicas do site.
+- `src/app/opengraph-image.tsx` gera a imagem usada em compartilhamentos.
+- `public/llms.txt` oferece um resumo complementar para agentes de IA; não substitui robots, sitemap ou dados estruturados.
+- `GOOGLE_SITE_VERIFICATION` e `BING_SITE_VERIFICATION` podem receber, na Vercel, os tokens fornecidos pelo Search Console e pelo Bing Webmaster Tools. Depois de cadastrá-los, é necessário fazer um novo deploy.
+
 ## Segurança — atualização do Next.js recomendada
 
 O projeto está no Next.js 14.2.35 (última versão da linha 14.x). Essa linha tem vulnerabilidades
