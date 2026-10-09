@@ -1,13 +1,12 @@
-import nodemailer from "nodemailer";
 import { handleContact } from "@/lib/contact";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
 export async function POST(request: Request) {
-  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM } = process.env;
-  const port = Number(SMTP_PORT);
-  if (!SMTP_HOST || ![465, 587].includes(port) || !SMTP_USER || !SMTP_PASSWORD || !SMTP_FROM) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.RESEND_FROM?.trim() || "Site SIAC <contato@envios.siac.tech>";
+  if (!apiKey) {
     return Response.json({ error: "Contato indisponível no momento. Use nossos canais diretos." }, {
       status: 503, headers: { "Cache-Control": "no-store" },
     });
@@ -17,31 +16,29 @@ export async function POST(request: Request) {
     allowedOrigins: (process.env.CONTACT_ALLOWED_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean),
     fetch,
     send: async (contact) => {
-      const transport = nodemailer.createTransport({
-        host: SMTP_HOST,
-        port,
-        secure: port === 465,
-        requireTLS: true,
-        auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
-        authMethod: "LOGIN",
-        connectionTimeout: 5000,
-        greetingTimeout: 5000,
-        socketTimeout: 10000,
-        dnsTimeout: 5000,
-        disableFileAccess: true,
-        disableUrlAccess: true,
-      });
+      let response: Response;
       try {
-        const result = await transport.sendMail({
-          from: { name: "Site SIAC", address: SMTP_FROM },
-          to: "comercial@siactecnologia.com.br",
-          replyTo: { name: contact.name, address: contact.email },
-          subject: "Novo contato pelo site SIAC",
-          text: `Nome: ${contact.name}\nE-mail: ${contact.email}\nTelefone: ${contact.phone}\nEmpresa: ${contact.company}\n\n${contact.message}`,
+        response = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from,
+            to: ["comercial@siactecnologia.com.br"],
+            reply_to: contact.email,
+            subject: "Novo contato pelo site SIAC",
+            text: `Nome: ${contact.name}\nE-mail: ${contact.email}\nTelefone: ${contact.phone}\nEmpresa: ${contact.company}\n\n${contact.message}`,
+          }),
+          signal: AbortSignal.timeout(10000),
+          cache: "no-store",
         });
-        if (!result.accepted.length) throw new Error("Recipient rejected");
-      } finally {
-        transport.close();
+      } catch {
+        throw { provider: "RESEND" };
+      }
+      if (!response.ok) {
+        throw { provider: "RESEND", status: response.status };
       }
     },
   });

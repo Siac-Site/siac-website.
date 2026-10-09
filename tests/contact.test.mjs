@@ -35,7 +35,7 @@ for (const [label, value] of [
   ["invalid email", { email: "no-email" }], ["empty name", { name: " " }],
   ["oversized message", { message: "a".repeat(4001) }], ["wrong field type", { phone: [] }],
 ]) {
-  test(`rejects ${label} without verification or SMTP`, async () => {
+  test(`rejects ${label} without verification or delivery`, async () => {
     const deps = dependencies();
     assert.equal((await handleContact(request({ ...fields, ...value }), deps)).status, 400);
     assert.equal(deps.calls.length, 0);
@@ -88,46 +88,58 @@ test("Cloudflare HTTP failure does not send email", async () => {
   assert.equal((await handleContact(request(), deps)).status, 503);
   assert.equal(deps.sent.length, 0);
 });
-test("SMTP failure never reports success or leaks provider details", async (t) => {
+test("delivery failure never reports success or leaks provider details", async (t) => {
   const log = t.mock.method(console, "error", () => {});
   const deps = dependencies();
-  deps.send = async () => { throw new Error("sensitive SMTP detail"); };
+  deps.send = async () => { throw new Error("sensitive provider detail"); };
   const res = await handleContact(request(), deps);
   assert.equal(res.status, 502);
-  assert.doesNotMatch(await res.text(), /sensitive SMTP detail/);
+  assert.doesNotMatch(await res.text(), /sensitive provider detail/);
   assert.deepEqual(log.mock.calls[0].arguments, ["contact_delivery_failed", {
-    reference: "SMTP_UNKNOWN", command: "UNKNOWN", responseCode: null,
+    reference: "DELIVERY_UNKNOWN", status: null,
   }]);
 });
 
-for (const code of ["EAUTH", "EDNS", "ECONNECTION", "ESOCKET", "ETIMEDOUT", "ETLS", "EENVELOPE", "EMESSAGE", "ESTREAM", "EREQUIRETLS"]) {
-  test(`SMTP ${code} exposes only an allowlisted reference`, async (t) => {
+for (const status of [400, 401, 403, 422, 429, 500, 503]) {
+  test(`Resend HTTP ${status} exposes only an allowlisted reference`, async (t) => {
     const log = t.mock.method(console, "error", () => {});
     const deps = dependencies();
     deps.send = async () => { throw Object.assign(new Error("private-password"), {
-      code, command: "AUTH PLAIN", responseCode: 535, response: "private-address@example.com",
+      provider: "RESEND", status, response: "private-address@example.com",
     }); };
     const res = await handleContact(request(), deps);
     assert.equal(res.status, 502);
     const body = await res.text();
-    assert.match(body, new RegExp(`SMTP_${code}`));
-    assert.doesNotMatch(body, /private-|535|AUTH PLAIN/);
+    assert.match(body, new RegExp(`RESEND_HTTP_${status}`));
+    assert.doesNotMatch(body, /private-/);
     assert.deepEqual(log.mock.calls[0].arguments, ["contact_delivery_failed", {
-      reference: `SMTP_${code}`, command: "AUTH PLAIN", responseCode: 535,
+      reference: `RESEND_HTTP_${status}`, status,
     }]);
   });
 }
 
-test("unrecognized SMTP diagnostic fields cannot leak into responses or logs", async (t) => {
+test("Resend network failures use a safe reference", async (t) => {
+  const log = t.mock.method(console, "error", () => {});
+  const deps = dependencies();
+  deps.send = async () => { throw { provider: "RESEND" }; };
+  const res = await handleContact(request(), deps);
+  assert.equal(res.status, 502);
+  assert.match(await res.text(), /RESEND_NETWORK/);
+  assert.deepEqual(log.mock.calls[0].arguments, ["contact_delivery_failed", {
+    reference: "RESEND_NETWORK", status: null,
+  }]);
+});
+
+test("unrecognized delivery diagnostic fields cannot leak into responses or logs", async (t) => {
   const log = t.mock.method(console, "error", () => {});
   const deps = dependencies();
   deps.send = async () => { throw {
-    code: "private-password", command: "AUTH PLAIN private-token", responseCode: "private-response",
+    provider: "private-password", status: "private-response",
   }; };
   const res = await handleContact(request(), deps);
   assert.equal(res.status, 502);
   assert.doesNotMatch(await res.text(), /private-/);
   assert.deepEqual(log.mock.calls[0].arguments, ["contact_delivery_failed", {
-    reference: "SMTP_UNKNOWN", command: "UNKNOWN", responseCode: null,
+    reference: "DELIVERY_UNKNOWN", status: null,
   }]);
 });
