@@ -23,6 +23,7 @@ export async function POST(request: Request) {
         port,
         ...smtpSecurity(port, process.env.SMTP_PLAINTEXT_TEST_UNTIL),
         auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
+        authMethod: "LOGIN",
         connectionTimeout: 5000,
         greetingTimeout: 5000,
         socketTimeout: 10000,

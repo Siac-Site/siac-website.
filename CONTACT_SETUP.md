@@ -5,6 +5,11 @@ origem, honeypot e o token Turnstile antes de enviar pelo SMTP. O destinatario
 e fixo: comercial@siactecnologia.com.br. O e-mail do visitante e usado somente
 em Reply-To. Nao existe resposta automatica ao visitante.
 
+O transporte solicita explicitamente AUTH LOGIN, anunciado pelo servidor
+mail30.m9.network junto com AUTH PLAIN. Essa escolha foi feita apos o servidor
+retornar 535 ao AUTH PLAIN com e sem STARTTLS. O LOGIN continua protegido por
+STARTTLS na porta 587; trocar o metodo nao corrige credenciais rejeitadas.
+
 ## Cloudflare e Vercel
 
 1. Criar um widget Turnstile no painel da Cloudflare, modo Managed. O plano
