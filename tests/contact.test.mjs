@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { handleContact } from "../src/lib/contact.ts";
 
 const origin = "https://site.example";
-const fields = { name: "Teste SIAC", email: "visitor@example.com", phone: "", company: "", message: "Mensagem de teste", website: "", token: "test-token" };
+const fields = { name: "Teste SIAC", email: "visitor@example.com", phone: "", company: "Empresa Teste", interest: "ERP Crítico", message: "Mensagem de teste", website: "", token: "test-token" };
 function request(data = fields, headers = {}) {
   return new Request(`${origin}/api/contact`, {
     method: "POST", headers: { origin, "content-type": "application/json", ...headers }, body: JSON.stringify(data),
@@ -26,13 +26,14 @@ test("validates token before sending; ignores injected recipient and extra field
   assert.equal(deps.calls.length, 1);
   assert.equal(deps.sent.length, 1);
   assert.deepEqual(JSON.parse(deps.calls[0].init.body), { secret: deps.secret, response: fields.token });
-  assert.deepEqual(Object.keys(deps.sent[0]), ["name", "email", "phone", "company", "message"]);
+  assert.deepEqual(Object.keys(deps.sent[0]), ["name", "email", "phone", "company", "interest", "message"]);
 });
 
 for (const [label, value] of [
   ["missing token", { token: "" }], ["oversized token", { token: "x".repeat(2049) }],
   ["honeypot", { website: "https://spam.example" }], ["header injection", { email: "a@example.com\r\nBcc: victim@example.com" }],
   ["invalid email", { email: "no-email" }], ["empty name", { name: " " }],
+  ["empty company", { company: " " }], ["invalid interest", { interest: "Oferta inventada" }],
   ["oversized message", { message: "a".repeat(4001) }], ["wrong field type", { phone: [] }],
 ]) {
   test(`rejects ${label} without verification or delivery`, async () => {

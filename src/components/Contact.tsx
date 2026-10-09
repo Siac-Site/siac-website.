@@ -1,6 +1,6 @@
 "use client";
 
-import { Send } from "lucide-react";
+import { ChevronDown, Headphones, Send } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 import { Turnstile } from "@/components/Turnstile";
 
@@ -60,6 +60,15 @@ export function Contact() {
             engenharia entrará em contato para estruturar a segurança e
             continuidade da sua operação.
           </p>
+          <a
+            href={`https://wa.me/552740421758?text=${encodeURIComponent("Olá, já sou cliente SIAC e preciso de suporte.")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-md inline-flex items-center gap-xs text-sm font-semibold text-brand-primary transition-colors ease-brand hover:text-brand-primary-dark"
+          >
+            <Headphones size={17} aria-hidden="true" />
+            Já é cliente? Fale com o suporte 24/7
+          </a>
         </div>
 
         {/* Coluna direita — formulário */}
@@ -94,7 +103,7 @@ export function Contact() {
                   className={inputClasses}
                 />
               </Field>
-              <Field label="Telefone" htmlFor="phone">
+              <Field label="Telefone/WhatsApp (opcional)" htmlFor="phone">
                 <input
                   id="phone"
                   name="phone"
@@ -111,6 +120,7 @@ export function Contact() {
               <input
                 id="company"
                 name="company"
+                required
                 maxLength={160}
                 autoComplete="organization"
                 type="text"
@@ -119,13 +129,37 @@ export function Contact() {
               />
             </Field>
 
-            <Field label="Mensagem" htmlFor="message">
+            <Field label="Área de interesse" htmlFor="interest">
+              <div className="relative">
+                <select
+                  id="interest"
+                  name="interest"
+                  required
+                  defaultValue=""
+                  className={`${inputClasses} appearance-none pr-xl`}
+                >
+                  <option value="" disabled>Selecione uma opção</option>
+                  <option value="ERP Crítico">ERP Crítico</option>
+                  <option value="Resiliência Cibernética">Resiliência Cibernética</option>
+                  <option value="Operação de TI">Operação de TI</option>
+                  <option value="Diagnóstico ou projeto">Diagnóstico ou projeto</option>
+                  <option value="Outro">Outro</option>
+                </select>
+                <ChevronDown
+                  size={17}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-md top-1/2 -translate-y-1/2 text-brand-graphite/50 dark:text-brand-ice/50"
+                />
+              </div>
+            </Field>
+
+            <Field label="Desafio atual" htmlFor="message">
               <textarea
                 id="message"
                 name="message"
                 required
                 maxLength={4000}
-                placeholder="Como podemos ajudar?"
+                placeholder="Conte brevemente sobre seu ambiente, desafio ou risco atual."
                 rows={5}
                 className={`${inputClasses} resize-none`}
               />
