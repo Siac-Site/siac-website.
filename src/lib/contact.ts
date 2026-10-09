@@ -3,6 +3,7 @@ export type ContactMessage = {
   email: string;
   phone: string;
   company: string;
+  interest: string;
   message: string;
 };
 
@@ -15,6 +16,13 @@ type Dependencies = {
 
 const EMAIL = /^[^\s<>(),;:\\"\[\]]+@[^\s<>(),;:\\"\[\]]+\.[^\s<>(),;:\\"\[\]]+$/;
 const MAX_BYTES = 24_000;
+const INTERESTS = new Set([
+  "ERP Crítico",
+  "Resiliência Cibernética",
+  "Operação de TI",
+  "Diagnóstico ou projeto",
+  "Outro",
+]);
 
 function deliveryDiagnostic(error: unknown) {
   const detail = error && typeof error === "object"
@@ -82,7 +90,7 @@ export async function handleContact(request: Request, deps: Dependencies) {
   if (typeof data.website !== "string" || data.website !== "") {
     return reply(400, "Não foi possível enviar o formulário.");
   }
-  const limits = { name: 120, email: 254, phone: 40, company: 160, message: 4000 };
+  const limits = { name: 120, email: 254, phone: 40, company: 160, interest: 40, message: 4000 };
   const contact = {} as ContactMessage;
   for (const key of Object.keys(limits) as (keyof ContactMessage)[]) {
     const value = data[key];
@@ -92,8 +100,9 @@ export async function handleContact(request: Request, deps: Dependencies) {
     }
     contact[key] = value.trim();
   }
-  if (!contact.name || !EMAIL.test(contact.email) || !contact.message) {
-    return reply(400, "Informe nome, e-mail válido e mensagem.");
+  if (!contact.name || !EMAIL.test(contact.email) || !contact.company ||
+      !INTERESTS.has(contact.interest) || !contact.message) {
+    return reply(400, "Informe nome, e-mail válido, empresa, área de interesse e mensagem.");
   }
   const token = data.token;
   if (typeof token !== "string" || !token || token.length > 2048) {

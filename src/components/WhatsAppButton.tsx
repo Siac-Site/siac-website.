@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 const PHONE = "552740421758";
 const MESSAGE = "Olá, vim pelo site da SIAC e gostaria de mais informações";
 const WHATSAPP_URL = `https://wa.me/${PHONE}?text=${encodeURIComponent(MESSAGE)}`;
@@ -7,13 +11,30 @@ const WHATSAPP_URL = `https://wa.me/${PHONE}?text=${encodeURIComponent(MESSAGE)}
 const WHATSAPP_GREEN = "#25D366";
 
 export function WhatsAppButton() {
+  const [contactVisible, setContactVisible] = useState(false);
+
+  useEffect(() => {
+    const contact = document.getElementById("contato");
+    if (!contact) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setContactVisible(entry.isIntersecting),
+      { threshold: 0.05 },
+    );
+    observer.observe(contact);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <a
       href={WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Falar no WhatsApp"
-      className="group fixed bottom-4 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-pill shadow-level-2 transition-transform ease-brand hover:scale-110 md:bottom-6 md:right-6"
+      aria-hidden={contactVisible}
+      tabIndex={contactVisible ? -1 : undefined}
+      className={`group fixed bottom-4 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-pill shadow-level-2 transition-all ease-brand hover:scale-110 md:bottom-6 md:right-6 ${
+        contactVisible ? "pointer-events-none scale-90 opacity-0" : "opacity-100"
+      }`}
     >
       {/* Soft expanding ring — subtle attention cue, not a hard blink */}
       <span
