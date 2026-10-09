@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 import { handleContact } from "@/lib/contact";
-import { smtpSecurity } from "@/lib/smtp-security";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -21,7 +20,8 @@ export async function POST(request: Request) {
       const transport = nodemailer.createTransport({
         host: SMTP_HOST,
         port,
-        ...smtpSecurity(port, process.env.SMTP_PLAINTEXT_TEST_UNTIL),
+        secure: port === 465,
+        requireTLS: true,
         auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
         authMethod: "LOGIN",
         connectionTimeout: 5000,

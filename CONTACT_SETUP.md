@@ -32,15 +32,6 @@ STARTTLS na porta 587; trocar o metodo nao corrige credenciais rejeitadas.
 
 ## Diagnostico SMTP
 
-Excepcao temporaria autorizada para diagnostico: SMTP_PLAINTEXT_TEST_UNTIL
-pode conter uma data ISO UTC de expiracao. Somente na porta 587 e antes dessa
-data, requireTLS=false e ignoreTLS=true desativam STARTTLS. A senha e o conteudo
-trafegam sem criptografia durante esse teste. Manter ausente em operacao normal;
-configurar somente no projeto autorizado e com prazo curto (15 minutos).
-Ausencia, data invalida ou prazo encerrado exigem TLS novamente, sem redeploy.
-A porta 465 nunca e afetada. Remover a variavel apos o teste e considerar
-rotacionar a senha utilizada. Essa excecao nao altera a validacao Turnstile.
-
 Falhas de envio exibem uma referencia limitada a codigos conhecidos, como
 SMTP_EAUTH (autenticacao), SMTP_ETIMEDOUT (tempo esgotado), SMTP_EDNS (DNS),
 SMTP_ETLS (TLS) e SMTP_EENVELOPE (remetente/destinatario). SMTP_UNKNOWN indica
